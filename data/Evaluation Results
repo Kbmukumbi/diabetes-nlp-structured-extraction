@@ -1,0 +1,100 @@
+Model Evaluation
+
+Dataset: 18,618 weakly-labeled notes
+Model: Bio_ClinicalBERT (token classification)
+Training: 1 epoch (CPU-friendly in Colab)
+
+Results:
+
+Metric	Score
+Token Accuracy	99.96%
+Evaluation Loss	0.0028
+F1-Score*	Approx. near-perfect for labeled tokens
+
+⚠️ Because the labels are weakly-supervised (regex heuristics), accuracy primarily measures consistency with our rule-based labels rather than clinical correctness.
+
+Interpretation:
+The model learned the weak labels extremely well. The next step would be adding a small hand-labeled dev set to measure “true” clinical accuracy.
+
+Inference Example
+A1c was 8.9% in June 2024. Increased metformin to 1000 mg BID.
+| Token     | Label        |
+| --------- | ------------ |
+| A1c       | B-LABTEST    |
+| 8.9       | B-LABVALUE   |
+| %         | I-LABVALUE   |
+| June      | B-DATE       |
+| 2024      | I-DATE       |
+| metformin | B-MEDICATION |
+| 1000      | B-UNIT       |
+| mg        | I-UNIT       |
+
+{
+  "lab_events": [
+    {
+      "test": "A1c",
+      "value": "8.9%",
+      "date": "June 2024"
+    }
+  ],
+  "medication_events": [
+    {
+      "drug": "metformin",
+      "dose": "1000 mg",
+      "frequency": "BID"
+    }
+  ]
+}
+🏗️ Pipeline Architecture
+Raw Clinical Note
+        │
+        ▼
+[ Cleaning + Normalization ]
+        │
+        ▼
+[ Tokenization ]
+        │
+        ▼
+[ Weak Supervision (Regex rules) ]
+        │
+        ▼
+[ Bio_ClinicalBERT Fine-Tuning (NER) ]
+        │
+        ▼
+[ Entity Extraction ]
+        │
+        ├── LABTEST
+        ├── LABVALUE
+        ├── UNIT
+        └── DATE
+        ▼
+[ Relation Linking (test-value-unit-date) ]
+        │
+        ▼
+[ Structured Output (JSON) ]
+        │
+        ▼
+Downstream Use:
+    - CDSS
+    - Research
+    - Glycemic timelines
+
+🚀 Future Work
+
+Build a small hand-labeled gold dataset for proper F1 evaluation
+
+Add relation extraction (e.g., A1c → value → date → unit)
+
+Add temporal normalization (map “last year” → actual date)
+
+Expand NER to include:
+
+Medications (metformin, insulin)
+
+Complications (neuropathy, CKD)
+
+Integrate with UMLS / LOINC / RxNorm for coding
+
+Deploy as a FHIR-compatible microservice for real EHR systems
+
+Add a Streamlit dashboard for visualizing patient timelines
