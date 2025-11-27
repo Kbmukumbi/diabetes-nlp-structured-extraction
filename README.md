@@ -117,6 +117,36 @@ The focus is on *diabetes-relevant entities* and *timeline reconstruction*.
      - Return predicted spans for LABTEST, LABVALUE, UNIT, DATE.
 
 ---
+## NER Pipeline Evaluation
+
+We trained a weakly supervised NER model to tag diabetes-relevant entities in
+clinical notes (LABTEST, LABVALUE, UNIT, DATE).
+
+**Setup**
+
+- Dataset: 18,618 de-identified discharge summaries (MIMIC dev notes).
+- Labels: Weak IOB tags generated with simple regex + heuristic rules.
+- Split: 80% train / 20% validation on the weakly labelled notes.
+- Model: `emilyalsentzer/Bio_ClinicalBERT` fine-tuned for 1 epoch using
+  HuggingFace `Trainer` (CPU-friendly, small batch size).
+
+**Validation results**
+
+- Token-level accuracy: **0.9996**
+- Validation loss: **0.0028**
+- Most tokens are “O”, so accuracy is dominated by background text, but
+  spot-checks show the model is able to pick up numeric lab values and some
+  diabetes-related terms.
+
+**Take-aways**
+
+- A simple weak-labeling strategy + one-epoch fine-tuning is enough to get a
+  working proof-of-concept NER model for diabetes notes.
+- The current model is intended as a baseline; future work includes:
+  - Better labeling rules for LABTEST / UNIT / DATE.
+  - Entity-level precision/recall/F1 using a manually annotated subset.
+  - Stronger relation extraction between LABTEST–LABVALUE–UNIT–DATE.
+
 
 ## ⚙️ How to Run (Colab-Friendly)
 
