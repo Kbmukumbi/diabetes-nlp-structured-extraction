@@ -159,3 +159,65 @@ pip install -r requirements.txt
 
 git clone https://github.com/Kbmukumbi/diabetes-nlp-structured-extraction.git
 cd diabetes-nlp-structured-extraction
+
+## 🔍 Evaluation & Key Findings
+
+We trained a token-level NER model by fine-tuning **Bio_ClinicalBERT** on the weakly labeled notes (`df_ner`).
+
+**Setup**
+
+- Base model: `emilyalsentzer/Bio_ClinicalBERT`
+- Labels: `O`, `B/I-LABTEST`, `B/I-LABVALUE`, `B/I-UNIT`, `B/I-DATE`
+- Train/validation split: 80% / 20% of 18,618 notes
+- Epochs: 1 (Colab-friendly)
+- Batch size: 4 (CPU)
+- Optimizer and scheduler: default HuggingFace `Trainer` settings
+
+**Token-level metrics (validation set)**
+
+- Loss: **≈ 0.0028**
+- Accuracy: **≈ 0.9996**
+
+Because labels are generated with simple rules, accuracy is mostly measuring **how well the model reproduces our weak labels**. The important result is that Bio_ClinicalBERT can:
+
+- Learn the **pattern of lab expressions** (e.g., “HbA1c 8.9 %”, “glucose 140 mg/dL 06/2024”).
+- Generalize to similar expressions in **previously unseen notes**.
+
+**Qualitative examples**
+
+On held-out notes, the model correctly tags:
+
+- `HbA1c` as **LABTEST**, `8.9` as **LABVALUE**, `%` as **UNIT**, and `06/2024` as **DATE**.
+- Fasting glucose measurements with varying formats, such as  
+  `glucose 140`, `glu 95`, or `blood sugar 210 mg/dL`.
+
+These token-level spans are then fed into a simple rule-based linker to reconstruct **structured diabetes events** like:
+
+> “A1c = 8.9 % on 2024-06-15”
+
+---
+
+## 👥 Target Population & Clinical Impact
+
+**Target population**
+
+Hospitalized / ICU patients with **diabetes and related cardiometabolic disease** documented in MIMIC-IV–style clinical notes.
+
+**Why this matters**
+
+- Diabetes patients often have **long, complex EHR histories**, with critical details scattered across years of notes.
+- Key decisions (e.g., intensifying insulin, adding SGLT2 inhibitors) depend on understanding **trends** in HbA1c and related labs, not just the most recent value.
+- Many clinical decision support systems **ignore free text**, so diabetes-relevant information is effectively “invisible” to algorithms.
+
+**Potential impact**
+
+This prototype demonstrates how an NLP pipeline can:
+
+- Turn free-text ICU notes into **structured lab timelines** (LABTEST, LABVALUE, UNIT, DATE).
+- Reduce the cognitive load for clinicians who need a **quick, accurate picture of glycemic control**.
+- Provide **structured features** that can be plugged into:
+  - CDSS alerts for poor glycemic control or hypoglycemia risk.
+  - Disease progression models for diabetes complications.
+  - Quality-improvement dashboards on diabetes management.
+
+While this is an early, weakly supervised system, it shows a realistic path from **messy narrative text** to **interoperable diabetes data** that can benefit both clinicians and patients.
