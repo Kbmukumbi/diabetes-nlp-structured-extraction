@@ -1,0 +1,74 @@
+# Data Description
+
+## 1. Source Datasets
+
+This project uses **public, de-identified datasets** commonly used in biomedical NLP research:
+
+- **MIMIC-IV clinical notes** (PhysioNet)  
+  - ICU and hospital admission notes for adult patients.
+  - Contains rich free-text documentation of lab results, medications, comorbidities, and complications.
+  - We work on a small de-identified subset of discharge-style notes for demonstration.
+
+- **(Optional extension) Synthetic diabetes notes (Synthea)**  
+  - If used, these notes are generated automatically using the Synthea tool.
+  - They are *fully synthetic* and contain no real patient information.
+  - They are useful to increase the number and variety of diabetes cases while preserving privacy.
+
+Because MIMIC-IV is access-controlled and large, **raw data are not stored in this GitHub repository**.  
+Instead, we provide:
+- The **weakly labeled token dataset** (`data/dev_notes_clean.csv` → `df_ner`) used in the notebook.
+- Documentation of how to re-create labels and model training from raw MIMIC-IV.
+
+Links to data sources:
+- MIMIC-IV: https://physionet.org/content/mimiciv/
+- Synthea: https://synthetichealth.github.io/synthea/
+
+---
+
+## 2. Target Population and Why It Matters
+
+The project focuses on **patients with diabetes and related cardiometabolic disease** documented in ICU / hospital notes.
+
+This population is important because:
+
+- Diabetes care is **lab-intensive**  
+  (e.g., HbA1c, fasting glucose, creatinine/eGFR).
+- Many clinically important details live only in **free text**:  
+  treatment changes, insulin regimen adjustments, complications (neuropathy, CKD, CAD), and hypoglycemia events.
+- Clinicians often need to reconstruct **years of glycemic history** across multiple notes, which is time-consuming and error-prone.
+
+By turning these notes into **structured timelines of lab values and events**, the system can:
+- Help clinicians quickly understand a patient’s **glycemic control over time**.
+- Support **clinical decision support systems (CDSS)** that require structured inputs.
+- Enable **research and quality-improvement projects** on diabetes outcomes.
+
+---
+
+## 3. How the Data Are Used in This Project
+
+1. **Text cleaning**
+   - Remove formatting artifacts and PHI placeholders.
+   - Keep medically relevant content (labs, meds, complications).
+
+2. **Weak labeling (Option 3 from proposal)**
+   - Simple tokenization into words.
+   - Regex + heuristics to label tokens as:
+     - `LABTEST` (e.g., “HbA1c”, “glucose”)
+     - `LABVALUE` (e.g., `8.9`, `140`)
+     - `UNIT` (e.g., `%`, `mg/dL`)
+     - `DATE` (e.g., `06/2024`, `2024-06-01`)
+   - Everything else is labeled as `O`.
+
+3. **Train / validation split**
+   - The weakly labeled tokens are stored as `df_ner` with:
+     - `tokens`: list of tokens for each note.
+     - `labels`: list of label IDs in BIO format.
+   - This is converted into a HuggingFace `Dataset` and split:
+     - 80% → training
+     - 20% → validation
+
+4. **Model training**
+   - Bio_ClinicalBERT is fine-tuned as a **token-level NER model** on these labels.
+   - Evaluation is done on the held-out validation split.
+
+This setup balances **realistic ICU diabetes documentation** (MIMIC-IV) with **privacy, reproducibility, and course constraints**.
