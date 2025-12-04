@@ -1,0 +1,22 @@
+FINAL MODEL METRICS — ClinicalBERT Relation Extraction
+
+Validation Set:
+- Loss: 0.2134
+- Accuracy: 0.943
+- Precision (macro): 0.94397
+- Recall (macro): 0.943
+- F1-score (macro): 0.94097
+
+Test Set:
+- Loss: 0.2018
+- Accuracy: 0.94388
+- Precision (macro): 0.94093
+- Recall (macro): 0.943
+- F1-score (macro): 0.94097
+
+Model:
+Bio_ClinicalBERT fine-tuned on the i2b2 Medication–Relation Extraction Task.
+
+Interpretation:
+The model achieves high and consistent performance across validation and test sets,
+indicating excellent generalization and stable training.
