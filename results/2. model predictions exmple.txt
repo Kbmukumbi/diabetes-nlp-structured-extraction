@@ -1,0 +1,29 @@
+MODEL PREDICTION EXAMPLES — ClinicalBERT Relation Extraction
+
+Example 1
+---------
+TEXT:
+"Budesonide 0.25 mg/2 mL Solution for Nebulization was prescribed."
+
+True Relation: Dosage-Drug
+Predicted Relation: Dosage-Drug
+
+Example 2
+---------
+TEXT:
+"Patient was instructed to take metformin 500mg twice daily."
+
+True Relation: Frequency-Drug
+Predicted Relation: Frequency-Drug
+
+Example 3
+---------
+TEXT:
+"Insulin glargine given via subcutaneous route."
+
+True Relation: Route-Drug
+Predicted Relation: Route-Drug
+
+Interpretation:
+The model correctly identifies medication-related relations such as dosage, frequency,
+and route, demonstrating strong clinical text understanding.
