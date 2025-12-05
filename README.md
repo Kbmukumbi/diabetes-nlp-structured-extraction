@@ -2,6 +2,8 @@ Diabetes Clinical Notes – Structured Extraction Pipeline
 
 SAT 5141 – Final Research Project
 Authors: Kudakwashe Blessing Mukumbi, Zixin Shi
+
+
 📌 Project Overview
 
 This project implements an end-to-end NLP pipeline for transforming unstructured diabetes clinical notes into structured, analyzable, and interoperable data.
